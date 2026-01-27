@@ -1,3 +1,30 @@
+<p align="center">
+  <img src="https://blocsuperpowers.org/_astro/superpowers.B7IP1WFP_18Xs88.webp" width="100">
+</p>
+
+<p align="center">
+  <a href="https://pub.dev/packages/bloc_superpowers"><img src="https://img.shields.io/pub/v/bloc_superpowers?style=flat-square&logo=dart" alt="Pub Version"></a>
+  <a href="https://github.com/marcglasberg/bloc_superpowers"><img src="https://img.shields.io/github/stars/marcglasberg/bloc_superpowers?style=social" alt="GitHub stars"></a>
+  <img src="https://img.shields.io/github/issues/marcglasberg/bloc_superpowers?style=flat-square" alt="Code Climate issues">
+  <img src="https://img.shields.io/github/issues-closed/marcglasberg/bloc_superpowers?style=flat-square" alt="GitHub closed issues">
+  <img src="https://img.shields.io/github/contributors/marcglasberg/bloc_superpowers?style=flat-square" alt="GitHub contributors">
+  <img src="https://img.shields.io/github/repo-size/marcglasberg/bloc_superpowers?style=flat-square" alt="GitHub repo size">
+  <img src="https://img.shields.io/github/forks/marcglasberg/bloc_superpowers?style=flat-square" alt="GitHub forks">
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome">
+  <a href="https://glasberg.dev/"><img src="https://img.shields.io/badge/Developed%20by%20Marcelo%20Glasberg-blue.svg" alt="Developed by Marcelo Glasberg"></a>
+  <a href="https://pub.dev/publishers/glasberg.dev/packages"><img src="https://img.shields.io/pub/publisher/bloc_superpowers.svg" alt="Glasberg.dev on pub.dev"></a>
+  <a href="https://pub.dev/packages/bloc_superpowers"><img src="https://badgen.net/pub/flutter-platform/bloc_superpowers" alt="Platforms"></a>
+</p>
+
+Created
+by [Marcelo Glasberg](https://glasberg.dev) _(2026)_ | [LinkedIn](https://linkedin.com/in/marcglasberg/) | [GitHub](https://github.com/marcglasberg/)
+
+#### Contributors
+
+<a href="https://github.com/marcglasberg/bloc_superpowers/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=marcglasberg/bloc_superpowers&columns=9"/>
+</a>
+
 # Bloc Superpowers
 
 This package gives **superpowers** to your Cubits.
@@ -1090,3 +1117,73 @@ Future<void> logout() async {
 The difference between `clear()` and `prepareToLogout()`:
 `clear()` resets everything including `globalCatchError` and `observer`.
 `prepareToLogout()` clears user data but keeps your app-level configuration.
+
+***
+
+### Complete docs → [blocsuperpowers.org](http://blocsuperpowers.org)
+
+***
+
+## By Marcelo Glasberg
+
+<a href="https://glasberg.dev">_glasberg.dev_</a>
+<br>
+<a href="https://github.com/marcglasberg">_github.com/marcglasberg_</a>
+<br>
+<a href="https://www.linkedin.com/in/marcglasberg/">
+_linkedin.com/in/marcglasberg/_</a>
+<br>
+<a href="https://twitter.com/glasbergmarcelo">_twitter.com/glasbergmarcelo_</a>
+<br>
+<a href="https://stackoverflow.com/users/3411681/marcg">
+_stackoverflow.com/users/3411681/marcg_</a>
+<br>
+<a href="https://medium.com/@marcglasberg">_medium.com/@marcglasberg_</a>
+<br>
+
+*I wrote Google's official Flutter documentation on layout rules*:
+
+* <a href="https://flutter.dev/docs/development/ui/layout/constraints">
+  Understanding
+  constraints</a>
+
+*The Flutter packages I've authored:*
+
+* <a href="https://pub.dev/packages/async_redux">async_redux</a>
+* <a href="https://pub.dev/packages/provider_for_redux">provider_for_redux</a>
+* <a href="https://pub.dev/packages/i18n_extension">i18n_extension</a>
+* <a href="https://pub.dev/packages/align_positioned">align_positioned</a>
+* <a href="https://pub.dev/packages/network_to_file_image">
+  network_to_file_image</a>
+* <a href="https://pub.dev/packages/image_pixels">image_pixels</a>
+* <a href="https://pub.dev/packages/matrix4_transform">matrix4_transform</a>
+* <a href="https://pub.dev/packages/back_button_interceptor">
+  back_button_interceptor</a>
+* <a href="https://pub.dev/packages/indexed_list_view">indexed_list_view</a>
+* <a href="https://pub.dev/packages/animated_size_and_fade">
+  animated_size_and_fade</a>
+* <a href="https://pub.dev/packages/assorted_layout_widgets">
+  assorted_layout_widgets</a>
+* <a href="https://pub.dev/packages/weak_map">weak_map</a>
+* <a href="https://pub.dev/packages/themed">themed</a>
+* <a href="https://pub.dev/packages/bdd_framework">bdd_framework</a>
+* <a href="https://pub.dev/packages/tiktoken_tokenizer_gpt4o_o1">
+  tiktoken_tokenizer_gpt4o_o1</a>
+
+*The JavaScript/TypeScript packages I've authored:*
+
+* [Kiss State, for React](https://kissforreact.org/) (similar to Async Redux,
+  but for React)
+* [Easy BDD Tool, for Jest](https://www.npmjs.com/package/easy-bdd-tool-jest)
+
+*My Medium Articles:*
+
+* <a href="https://medium.com/flutter-community/i18n-extension-flutter-b966f4c65df9">
+  i18n_extension</a> 
+  (versions: <a href="https://medium.com/flutterando/qual-a-forma-f%C3%A1cil-de-traduzir-seu-app-flutter-para-outros-idiomas-ab5178cf0336">
+  Português</a>)
+* <a href="https://medium.com/flutter-community/flutter-the-advanced-layout-rule-even-beginners-must-know-edc9516d1a2">
+  Flutter: The Advanced Layout Rule Even Beginners Must Know</a> 
+  (versions: <a href="https://habr.com/ru/post/500210/">русский</a>)
+* <a href="https://medium.com/flutter-community/the-new-way-to-create-themes-in-your-flutter-app-7fdfc4f3df5f">
+  The New Way to create Themes in your Flutter App</a> 
