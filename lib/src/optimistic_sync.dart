@@ -1,10 +1,7 @@
 // Developed by Marcelo Glasberg (2026) https://glasberg.dev and https://github.com/marcglasberg
 // For more info, see: https://pub.dartlang.org/packages/bloc_superpowers and http://blocsuperpowers.org
-
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:bloc_superpowers/bloc_superpowers.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';

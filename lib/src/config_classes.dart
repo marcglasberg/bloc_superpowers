@@ -309,6 +309,7 @@ class NonReentrantConfig {
   /// Default nonReentrant configuration values.
   ///
   /// Since NonReentrantConfig has no required fields, defaults is an empty config.
+  // ignore: unnecessary_getters_setters
   static NonReentrantConfig get defaults => _defaults;
 
   static set defaults(NonReentrantConfig value) {
@@ -971,6 +972,21 @@ class MixConfig {
   /// with the original stack trace. This follows the familiar try/catch pattern.
   final void Function(Object error, StackTrace stackTrace)? catchError;
 
+  /// Callback to provide metrics data for [Superpowers.observer].
+  ///
+  /// Called at start and end of the [mix] call. The result is passed to
+  /// [Superpowers.observer] as the `metrics` parameter.
+  ///
+  /// Typically used to capture Cubit state:
+  /// ```dart
+  /// mix(
+  ///   key: (UserCubit, itemId),
+  ///   metrics: () => this,  // Capture Cubit for state access in observer
+  ///   () async { ... },
+  /// );
+  /// ```
+  final Object? Function()? metrics;
+
   const MixConfig({
     this.retry,
     this.checkInternet,
@@ -983,6 +999,7 @@ class MixConfig {
     this.after,
     this.wrapRun,
     this.catchError,
+    this.metrics,
   });
 
   /// Merges [other] on top of this. Non-null values in [other] win.
@@ -1002,6 +1019,7 @@ class MixConfig {
       after: other.after ?? after,
       wrapRun: other.wrapRun ?? wrapRun,
       catchError: other.catchError ?? catchError,
+      metrics: other.metrics ?? metrics,
     );
   }
 }

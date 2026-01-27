@@ -1,6 +1,5 @@
 // Developed by Marcelo Glasberg (2026) https://glasberg.dev and https://github.com/marcglasberg
 // For more info, see: https://pub.dartlang.org/packages/bloc_superpowers and http://blocsuperpowers.org
-
 import 'dart:async';
 import 'package:bloc_superpowers/bloc_superpowers.dart';
 import 'package:flutter/material.dart';

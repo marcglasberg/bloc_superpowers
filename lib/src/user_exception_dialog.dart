@@ -1,12 +1,7 @@
 // Developed by Marcelo Glasberg (2026) https://glasberg.dev and https://github.com/marcglasberg
 // For more info, see: https://pub.dartlang.org/packages/bloc_superpowers and http://blocsuperpowers.org
-
 import 'dart:async';
-
 import 'package:bloc_superpowers/bloc_superpowers.dart';
-import 'package:bloc_superpowers/src/advanced_user_exception.dart';
-import 'package:bloc_superpowers/src/superpowers.dart';
-import 'package:bloc_superpowers/src/user_exception.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -175,9 +170,11 @@ class _UserExceptionDialogState extends State<UserExceptionDialog> {
 
     // Show platform-appropriate dialog
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      _showCupertinoDialog(dialogContext, title, content, exception, handleDismiss);
+      _showCupertinoDialog(
+          dialogContext, title, content, exception, handleDismiss);
     } else {
-      _showMaterialDialog(dialogContext, title, content, exception, handleDismiss);
+      _showMaterialDialog(
+          dialogContext, title, content, exception, handleDismiss);
     }
   }
 

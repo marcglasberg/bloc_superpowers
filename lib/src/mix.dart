@@ -84,7 +84,7 @@ const sequential = SequentialConfig();
 /// Casts a generic wrapRun function to the specific type T.
 ///
 /// This is needed because MixConfig stores wrapRun as `FutureOr<dynamic> Function(...)`
-/// but mix<T> needs `FutureOr<T> Function(...)`.
+/// but `mix<T>` needs `FutureOr<T> Function(...)`.
 FutureOr<T> Function(FutureOr<T> Function())? _castWrapRun<T>(
   FutureOr<dynamic> Function(FutureOr<dynamic> Function())? wrapRun,
 ) {
@@ -688,6 +688,7 @@ class _Mix {
     CheckInternetConfig? checkInternet,
     RetryConfig? retry,
     void Function(Object error, StackTrace stackTrace)? catchError,
+    Object? Function()? metrics,
   }) {
     // Resolve effective configs using merge order: default → config → explicit
     final effectiveRetry = _resolveRetryConfig(config?.retry, retry);
@@ -708,6 +709,7 @@ class _Mix {
     final effectiveAfter = config?.after;
     final effectiveWrapRun = _castWrapRun<T>(config?.wrapRun);
     final effectiveCatchError = catchError ?? config?.catchError;
+    final effectiveMetrics = metrics ?? config?.metrics;
 
     // If any async feature is used, delegate to async implementation
     if (effectiveDebounce != null ||
@@ -728,6 +730,7 @@ class _Mix {
         after: effectiveAfter,
         wrapRun: effectiveWrapRun,
         catchError: effectiveCatchError,
+        metrics: effectiveMetrics,
       );
     }
 
@@ -742,6 +745,7 @@ class _Mix {
       after: effectiveAfter,
       wrapRun: effectiveWrapRun,
       catchError: effectiveCatchError,
+      metrics: effectiveMetrics,
     );
   }
 
@@ -787,6 +791,7 @@ class _Mix {
     CheckInternetConfig? checkInternet,
     RetryConfig? retry,
     void Function(Object error, StackTrace stackTrace)? catchError,
+    Object? Function()? metrics,
   }) {
     // Resolve effective configs using merge order: default → config → explicit
     final effectiveRetry = _resolveRetryConfig(config?.retry, retry);
@@ -807,6 +812,7 @@ class _Mix {
     final effectiveAfter = config?.after;
     final effectiveWrapRun = _castWrapRun<T>(config?.wrapRun);
     final effectiveCatchError = catchError ?? config?.catchError;
+    final effectiveMetrics = metrics ?? config?.metrics;
 
     // Create the base context (sequential context is set in _mixCtxAsync with queue info)
     final baseContext = MixContext(
@@ -851,6 +857,7 @@ class _Mix {
         after: effectiveAfter,
         wrapRun: effectiveWrapRun,
         catchError: effectiveCatchError,
+        metrics: effectiveMetrics,
       );
     }
 
@@ -865,6 +872,7 @@ class _Mix {
       after: effectiveAfter,
       wrapRun: effectiveWrapRun,
       catchError: effectiveCatchError,
+      metrics: effectiveMetrics,
     );
   }
 }
@@ -901,6 +909,7 @@ FutureOr<T?> _mixSync<T>({
   FutureOr<void> Function()? after,
   FutureOr<T> Function(FutureOr<T> Function())? wrapRun,
   void Function(Object error, StackTrace stackTrace)? catchError,
+  Object? Function()? metrics,
 }) {
   // Normalize key: if it's a Cubit/Bloc instance, use its runtimeType instead.
   final Object effectiveKey = key is BlocBase ? key.runtimeType : key;
@@ -912,6 +921,14 @@ FutureOr<T?> _mixSync<T>({
 
   // Track inline state (for isWaitingInline/isFailedInline)
   Superpowers.onStart(effectiveKey);
+
+  // Track start time and notify observer
+  final startTime = DateTime.now();
+  _notifyObserver(
+    isStart: true,
+    key: effectiveKey,
+    metrics: metrics,
+  );
 
   // Handle non-reentrant check
   if (nonReentrant != null) {
@@ -974,9 +991,20 @@ FutureOr<T?> _mixSync<T>({
 
   bool actionFailed = false;
   UserException? inlineUserException;
+  Object? lastError;
+  StackTrace? lastStackTrace;
 
   /// Cleanup function to be called on completion
   void cleanup() {
+    // Notify observer at end
+    _notifyObserver(
+      isStart: false,
+      key: effectiveKey,
+      metrics: metrics,
+      error: lastError,
+      stackTrace: lastStackTrace,
+      duration: DateTime.now().difference(startTime),
+    );
     if (nonReentrant != null) {
       _getNonReentrantKeySet().remove(nonReentrantKey);
     }
@@ -1013,20 +1041,25 @@ FutureOr<T?> _mixSync<T>({
         return beforeResult.then((_) {
           return _executeSyncAction<T>(
             action: action,
+            key: effectiveKey,
             wrapRun: wrapRun,
             after: after,
             catchError: catchError,
             cleanup: cleanup,
             setActionFailed: (failed) => actionFailed = failed,
             setInlineUserException: (e) => inlineUserException = e,
+            setLastError: (e) => lastError = e,
+            setLastStackTrace: (s) => lastStackTrace = s,
           );
         }).catchError((error, stack) {
           if (error is! AbortException) actionFailed = true;
+          lastError = error;
+          lastStackTrace = stack;
           // Get the UserException first (if any), then cleanup
           // Use try-finally to ensure cleanup is called even if _handleFinalError rethrows
           try {
             inlineUserException =
-                _handleFinalError(error, stack, after, catchError);
+                _handleFinalError(error, stack, effectiveKey, after, catchError);
           } finally {
             cleanup();
           }
@@ -1035,10 +1068,12 @@ FutureOr<T?> _mixSync<T>({
       }
     } catch (error, stack) {
       if (error is! AbortException) actionFailed = true;
+      lastError = error;
+      lastStackTrace = stack;
       // Get the UserException first (if any), then cleanup
       // Use try-finally to ensure cleanup is called even if _handleFinalError rethrows
       try {
-        inlineUserException = _handleFinalError(error, stack, after, catchError);
+        inlineUserException = _handleFinalError(error, stack, effectiveKey, after, catchError);
       } finally {
         cleanup();
       }
@@ -1049,12 +1084,15 @@ FutureOr<T?> _mixSync<T>({
   // Execute action synchronously
   return _executeSyncAction<T>(
     action: action,
+    key: effectiveKey,
     wrapRun: wrapRun,
     after: after,
     catchError: catchError,
     cleanup: cleanup,
     setActionFailed: (failed) => actionFailed = failed,
     setInlineUserException: (e) => inlineUserException = e,
+    setLastError: (e) => lastError = e,
+    setLastStackTrace: (s) => lastStackTrace = s,
   );
 }
 
@@ -1062,12 +1100,15 @@ FutureOr<T?> _mixSync<T>({
 /// Returns T? because the action may fail (returning null on error).
 FutureOr<T?> _executeSyncAction<T>({
   required FutureOr<T> Function() action,
+  required Object key,
   required FutureOr<T> Function(FutureOr<T> Function())? wrapRun,
   required FutureOr<void> Function()? after,
   required void Function(Object error, StackTrace stackTrace)? catchError,
   required void Function() cleanup,
   required void Function(bool) setActionFailed,
   required void Function(UserException?) setInlineUserException,
+  required void Function(Object) setLastError,
+  required void Function(StackTrace) setLastStackTrace,
 }) {
   try {
     final FutureOr<T> result;
@@ -1086,11 +1127,13 @@ FutureOr<T?> _executeSyncAction<T>({
         return value;
       }).catchError((error, stack) {
         if (error is! AbortException) setActionFailed(true);
+        setLastError(error);
+        setLastStackTrace(stack);
         // Get the UserException first (if any), then cleanup
         // Use try-finally to ensure cleanup is called even if _handleFinalError rethrows
         try {
           setInlineUserException(
-              _handleFinalError(error, stack, after, catchError));
+              _handleFinalError(error, stack, key, after, catchError));
         } finally {
           cleanup();
         }
@@ -1104,10 +1147,12 @@ FutureOr<T?> _executeSyncAction<T>({
     }
   } catch (error, stack) {
     if (error is! AbortException) setActionFailed(true);
+    setLastError(error);
+    setLastStackTrace(stack);
     // Get the UserException first (if any), then cleanup
     // Use try-finally to ensure cleanup is called even if _handleFinalError rethrows
     try {
-      setInlineUserException(_handleFinalError(error, stack, after, catchError));
+      setInlineUserException(_handleFinalError(error, stack, key, after, catchError));
     } finally {
       cleanup();
     }
@@ -1130,6 +1175,7 @@ Future<T?> _mixAsync<T>({
   FutureOr<void> Function()? after,
   FutureOr<T> Function(FutureOr<T> Function() action)? wrapRun,
   void Function(Object error, StackTrace stackTrace)? catchError,
+  Object? Function()? metrics,
 }) async {
   // Normalize key: if it's a Cubit/Bloc instance, use its runtimeType instead.
   // This allows users to pass `this` from within a Cubit/Bloc method and have
@@ -1190,6 +1236,7 @@ Future<T?> _mixAsync<T>({
         _handleFinalError(
           exception,
           StackTrace.current,
+          effectiveKey,
           after,
           catchError,
         );
@@ -1229,6 +1276,18 @@ Future<T?> _mixAsync<T>({
 
   // Track inline state (for isWaitingInline/isFailedInline)
   Superpowers.onStart(effectiveKey);
+
+  // Track start time and notify observer
+  final startTime = DateTime.now();
+  _notifyObserver(
+    isStart: true,
+    key: effectiveKey,
+    metrics: metrics,
+  );
+
+  // Track error for observer notification at end
+  Object? lastError;
+  StackTrace? lastStackTrace;
 
   // Handle sequential queue wait (after onStart - so waiting shows as "in progress")
   DateTime? sequentialQueuedAt;
@@ -1376,9 +1435,11 @@ Future<T?> _mixAsync<T>({
         } catch (error, stack) {
           // AbortException is not a failure - it's an intentional silent abort
           if (error is! AbortException) actionFailed = true;
+          lastError = error;
+          lastStackTrace = stack;
           // Handle error from before()
           inlineUserException =
-              _handleFinalError(error, stack, after, catchError);
+              _handleFinalError(error, stack, effectiveKey, after, catchError);
           return null;
         }
       }
@@ -1409,8 +1470,10 @@ Future<T?> _mixAsync<T>({
       } catch (error, stack) {
         // AbortException is not a failure - it's an intentional silent abort
         if (error is! AbortException) actionFailed = true;
+        lastError = error;
+        lastStackTrace = stack;
         // Handle final error (after all retries exhausted)
-        inlineUserException = _handleFinalError(error, stack, after, catchError);
+        inlineUserException = _handleFinalError(error, stack, effectiveKey, after, catchError);
         return null;
       }
     } finally {
@@ -1448,6 +1511,16 @@ Future<T?> _mixAsync<T>({
         _pruneThrottleLocks();
       }
 
+      // Notify observer at end
+      _notifyObserver(
+        isStart: false,
+        key: effectiveKey,
+        metrics: metrics,
+        error: lastError,
+        stackTrace: lastStackTrace,
+        duration: DateTime.now().difference(startTime),
+      );
+
       // Track inline completion (for isWaitingInline/isFailedInline)
       Superpowers.onComplete(effectiveKey, actionFailed ? inlineUserException : null);
     }
@@ -1477,6 +1550,7 @@ Future<T?> _mixCtxAsync<T>({
   FutureOr<void> Function()? after,
   FutureOr<T> Function(FutureOr<T> Function() action)? wrapRun,
   void Function(Object error, StackTrace stackTrace)? catchError,
+  Object? Function()? metrics,
 }) async {
   // Normalize key: if it's a Cubit/Bloc instance, use its runtimeType instead.
   final Object effectiveKey = key is BlocBase ? key.runtimeType : key;
@@ -1518,7 +1592,7 @@ Future<T?> _mixCtxAsync<T>({
       } else {
         final exception = ConnectionException.noConnectivity
             .withDialog(checkInternet.ifOpenDialog!);
-        _handleFinalError(exception, StackTrace.current, after, catchError);
+        _handleFinalError(exception, StackTrace.current, effectiveKey, after, catchError);
         return null;
       }
     }
@@ -1552,6 +1626,18 @@ Future<T?> _mixCtxAsync<T>({
   }
 
   Superpowers.onStart(effectiveKey);
+
+  // Track start time and notify observer
+  final startTime = DateTime.now();
+  _notifyObserver(
+    isStart: true,
+    key: effectiveKey,
+    metrics: metrics,
+  );
+
+  // Track error for observer notification at end
+  Object? lastError;
+  StackTrace? lastStackTrace;
 
   DateTime? sequentialQueuedAt;
   int? myWaiterId;
@@ -1688,8 +1774,10 @@ Future<T?> _mixCtxAsync<T>({
           if (result is Future) await result;
         } catch (error, stack) {
           if (error is! AbortException) actionFailed = true;
+          lastError = error;
+          lastStackTrace = stack;
           inlineUserException =
-              _handleFinalError(error, stack, after, catchError);
+              _handleFinalError(error, stack, effectiveKey, after, catchError);
           return null;
         }
       }
@@ -1717,7 +1805,9 @@ Future<T?> _mixCtxAsync<T>({
         return finalResult;
       } catch (error, stack) {
         if (error is! AbortException) actionFailed = true;
-        inlineUserException = _handleFinalError(error, stack, after, catchError);
+        lastError = error;
+        lastStackTrace = stack;
+        inlineUserException = _handleFinalError(error, stack, effectiveKey, after, catchError);
         return null;
       }
     } finally {
@@ -1746,6 +1836,16 @@ Future<T?> _mixCtxAsync<T>({
         }
         _pruneThrottleLocks();
       }
+
+      // Notify observer at end
+      _notifyObserver(
+        isStart: false,
+        key: effectiveKey,
+        metrics: metrics,
+        error: lastError,
+        stackTrace: lastStackTrace,
+        duration: DateTime.now().difference(startTime),
+      );
 
       Superpowers.onComplete(effectiveKey, actionFailed ? inlineUserException : null);
     }
@@ -2029,11 +2129,47 @@ FutureOr<T> Function() _buildEffectiveWrapRunWithContext<T>({
   };
 }
 
+/// Safely calculates the metrics value by calling the [metrics] callback.
+/// If the callback throws, returns the error instead. Never throws.
+Object? _calculateMetrics(Object? Function()? metrics) {
+  if (metrics == null) return null;
+  try {
+    return metrics();
+  } catch (e) {
+    return e;
+  }
+}
+
+/// Notifies the [Superpowers.observer] if set.
+/// Safely calculates metrics and catches any observer errors.
+void _notifyObserver({
+  required bool isStart,
+  required Object key,
+  required Object? Function()? metrics,
+  Object? error,
+  StackTrace? stackTrace,
+  Duration? duration,
+}) {
+  final observer = Superpowers.observer;
+  if (observer == null) return;
+
+  final metricsValue = _calculateMetrics(metrics);
+
+  try {
+    observer(isStart, key, metricsValue, error, stackTrace, duration);
+  } catch (_) {
+    // Never let observer errors bubble up
+  }
+}
+
 /// Handles the final error after all retries are exhausted.
 /// Similar to Superpowers's _handleError method.
 ///
 /// Returns the [UserException] if the processed error is a UserException
 /// (for inline tracking purposes), or null otherwise.
+///
+/// The [key] parameter is the effective key from the [mix] call, passed to
+/// [Superpowers.globalCatchError] for logging purposes.
 ///
 /// The [catchError] callback follows try/catch semantics:
 /// - If it returns normally, the error is suppressed
@@ -2041,6 +2177,7 @@ FutureOr<T> Function() _buildEffectiveWrapRunWithContext<T>({
 UserException? _handleFinalError(
   Object error,
   StackTrace stackTrace,
+  Object key,
   FutureOr<void> Function()? after,
   void Function(Object error, StackTrace stackTrace)? catchError,
 ) {
@@ -2050,7 +2187,7 @@ UserException? _handleFinalError(
     return null;
   }
 
-  // Process error through catchError using try/catch semantics:
+  // Process error through LOCAL catchError using try/catch semantics:
   // - If catchError returns normally → suppress the error (processedError = null)
   // - If catchError throws → propagate that error (processedError = thrownError)
   Object? processedError;
@@ -2071,10 +2208,22 @@ UserException? _handleFinalError(
   // Always call after()
   _runAfter(after);
 
-  // Handle the error based on type
+  // If local catchError suppressed the error, we're done
   if (processedError == null) {
-    // catchError returned normally - error was suppressed
     return null;
+  }
+
+  // Process error through GLOBAL catchError (if set)
+  final globalCatchError = Superpowers.globalCatchError;
+  if (globalCatchError != null) {
+    try {
+      globalCatchError(processedError, stackTrace, key);
+      // Returned normally - global suppressed the error
+      return null;
+    } catch (thrownError) {
+      // Global threw an error - use that instead
+      processedError = thrownError;
+    }
   }
 
   // UserExceptions with ifOpenDialog=true are queued for dialog display
@@ -2093,6 +2242,7 @@ UserException? _handleFinalError(
 
   // Note: This return is never reached due to rethrow above,
   // but Dart requires it for type safety
+  // ignore: dead_code
   return userExceptionForTracking;
 }
 

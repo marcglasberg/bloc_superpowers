@@ -4,7 +4,8 @@ import 'dart:async';
 import 'dart:collection';
 import 'package:bloc_superpowers/bloc_superpowers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc/bloc.dart';
+import 'package:provider/provider.dart';
 
 /// BuildContext extension for checking waiting/failed state of Cubit methods.
 ///
@@ -356,10 +357,6 @@ class Superpowers extends StatefulWidget {
   /// Can store timers, streams, futures with automatic cleanup via [disposeProps].
   static final Map<Object?, Object?> _props = HashMap();
 
-  /// Gets the store properties.
-  @visibleForTesting
-  static Map<Object?, Object?> get props => _props;
-
   /// Gets a property from the store.
   ///
   /// This can be used to save global values, scoped to the static Superpowers state.
@@ -394,12 +391,12 @@ class Superpowers extends StatefulWidget {
   /// timers, streams, sinks, and futures that are saved as properties.
   ///
   /// * If no predicate is provided, all properties which are [Timer], [Future],
-  ///   [StreamSubscription], [StreamConsumer], or [Sink] will be closed/cancelled
+  ///   [StreamSubscription], [StreamConsumer], or [Sink] will be closed/canceled
   ///   as appropriate, and then removed. Other properties will not be removed.
   ///
   /// * If a predicate is provided and returns `true` for a given property, that
   ///   property will be removed. If it's also a Timer/Future/Stream type, it will
-  ///   be closed/cancelled.
+  ///   be closed/canceled.
   ///
   /// * If a predicate returns `false`, that property will not be removed or closed.
   ///
@@ -449,7 +446,7 @@ class Superpowers extends StatefulWidget {
     disposeProps(({Object? key, Object? value}) => key == keyToDispose);
   }
 
-  /// If [obj] is a timer, future or stream related, it will be closed/cancelled/ignored,
+  /// If [obj] is a timer, future or stream related, it will be closed/canceled/ignored,
   /// and `true` will be returned. For other object types, the method returns `false`.
   static bool _closeTimerFutureStream(Object? obj) {
     if (obj is Timer) {
@@ -469,12 +466,6 @@ class Superpowers extends StatefulWidget {
     return true;
   }
 
-  // -------- Internal Mixin Props --------
-
-  /// Internal properties used by the provided mixins (Debounce, Throttle, etc.).
-  /// You should not use this directly.
-  static final internalMixinProps = _InternalMixinProps();
-
   // -------- Error Queue --------
 
   /// Error queue (bounded, FIFO) for UserExceptions.
@@ -482,7 +473,7 @@ class Superpowers extends StatefulWidget {
 
   /// Stream controller for notifying listeners when UserExceptions are added.
   static final StreamController<UserException> _userExceptionController =
-  StreamController<UserException>.broadcast();
+      StreamController<UserException>.broadcast();
 
   /// Maximum number of errors to keep in the queue.
   static int _maxErrorsQueued = 10;
@@ -513,9 +504,75 @@ class Superpowers extends StatefulWidget {
     _userExceptionController.add(error);
   }
 
+  // -------- Global Error Handler --------
+
+  /// Global error handler called after all local [catchError] handlers.
+  ///
+  /// Only invoked if the error propagates (wasn't suppressed by local handlers).
+  /// The [key] parameter is the effective key from the [mix] call, useful for logging.
+  ///
+  /// Use cases:
+  /// - Centralized error logging
+  /// - Converting third-party exceptions (FirebaseException, DioException) to [UserException]
+  ///
+  /// Example:
+  /// ```dart
+  /// Superpowers.globalCatchError = (error, stack, key) {
+  ///   logError(error, stack, key: key);  // Log with context
+  ///
+  ///   if (error is UserException) throw error;  // Already user-friendly
+  ///
+  ///   if (error is FirebaseAuthException) {
+  ///     throw UserException(_mapFirebaseError(error)).addCause(error);
+  ///   }
+  ///
+  ///   // Unknown error - generic message
+  ///   throw UserException('Something went wrong').addCause(error);
+  /// };
+  /// ```
+  static void Function(Object error, StackTrace stackTrace, Object key)?
+      globalCatchError;
+
+  // -------- Mix Observer --------
+
+  /// Global observer for [mix] calls, useful for metrics and analytics.
+  ///
+  /// Called twice for each [mix] call:
+  /// - At start: [isStart] is true, [error], [stackTrace], and [duration] are null
+  /// - At end: [isStart] is false, [duration] contains elapsed time,
+  ///   [error] and [stackTrace] are set if the action failed
+  ///
+  /// The [metrics] parameter contains the result of the `metrics` callback
+  /// passed to [mix], or the error if the callback threw. This is calculated
+  /// separately at start and end, so it can reflect state changes.
+  ///
+  /// Example:
+  /// ```dart
+  /// Superpowers.observer = (isStart, key, metrics, error, stackTrace, duration) {
+  ///   if (isStart) {
+  ///     analytics.startOperation(key.toString());
+  ///   } else {
+  ///     analytics.endOperation(
+  ///       key.toString(),
+  ///       duration: duration,
+  ///       success: error == null,
+  ///       state: metrics, // Cubit state if metrics: () => this was passed
+  ///     );
+  ///   }
+  /// };
+  /// ```
+  static void Function(
+    bool isStart,
+    Object key,
+    Object? metrics,
+    Object? error,
+    StackTrace? stackTrace,
+    Duration? duration,
+  )? observer;
+
   /// Stream controller for notifying listeners when method state changes.
   static final StreamController<void> _stateController =
-  StreamController<void>.broadcast();
+      StreamController<void>.broadcast();
 
   /// Stream that emits when method waiting/failed state changes.
   static Stream<void> get onStateChange => _stateController.stream;
@@ -679,6 +736,7 @@ class Superpowers extends StatefulWidget {
   /// - [maxErrorsQueued]: Maximum number of errors to keep in the queue (default: 10)
   /// - [simulateInternet]: Function to simulate internet connectivity for testing.
   ///   Returns `true` (internet ON), `false` (internet OFF), or `null` (use real check).
+  @visibleForTesting
   static void clear({
     int maxErrorsQueued = 10,
     bool? Function()? simulateInternet,
@@ -694,14 +752,69 @@ class Superpowers extends StatefulWidget {
     _errors.clear();
     _maxErrorsQueued = maxErrorsQueued;
 
+    // Reset global error handler.
+    globalCatchError = null;
+
+    // Reset mix observer.
+    observer = null;
+
     // Reset inline state tracking.
     _inProgress.clear();
     _awaitable.clear();
     _failed.clear();
     _checkFailed.clear();
+  }
 
-    // Reset internal mixin props.
-    internalMixinProps.clear();
+  /// Resets user-specific state while keeping app-level configuration.
+  ///
+  /// Call this when a user logs out to clean up their session data:
+  /// - Disposes and clears all props (timers, streams, futures)
+  /// - Clears the error queue
+  /// - Clears waiting/failed state tracking
+  ///
+  /// Unlike [clear], this method preserves app-level configuration:
+  /// - [globalCatchError] (your error handling setup)
+  /// - [observer] (your analytics/metrics setup)
+  /// - [maxErrorsQueued] setting
+  ///
+  /// The [delay] parameter (default 5 seconds) runs cleanup twice with a pause
+  /// between, catching any in-flight Cubit operations. Set to [Duration.zero]
+  /// for immediate cleanup without waiting.
+  ///
+  /// Example:
+  /// ```dart
+  /// Future<void> logout() async {
+  ///   await Superpowers.prepareToLogout();
+  ///   await authService.signOut();
+  ///   Navigator.pushReplacementNamed(context, '/login');
+  /// }
+  /// ```
+  static Future<void> prepareToLogout({
+    Duration delay = const Duration(seconds: 5),
+  }) async {
+    // Dispose and clear props (timers, streams, futures from user session).
+    disposeProps();
+    _props.clear();
+
+    // Clear error queue (errors from previous user session).
+    _errors.clear();
+
+    // Clear inline state tracking (waiting/failed from previous user).
+    _inProgress.clear();
+    _awaitable.clear();
+    _failed.clear();
+    _checkFailed.clear();
+
+    // If delay is specified, clean up, wait half, then do another final
+    // cleanup. This helps ensure any in-flight operations are cleared.
+    if (delay.inMilliseconds > 0) {
+      await Future.delayed(delay ~/ 2);
+      prepareToLogout(delay: Duration.zero);
+      await Future.delayed(delay ~/ 2);
+
+      // Notify UI to rebuild (in case widgets are showing old waiting/failed state).
+      _stateController.add(null);
+    }
   }
 }
 
@@ -751,23 +864,5 @@ class _SuperpowersInherited extends InheritedWidget {
   @override
   bool updateShouldNotify(covariant _SuperpowersInherited oldWidget) {
     return version != oldWidget.version;
-  }
-}
-
-// ---------- Internal Mixin Props ----------
-
-/// Internal properties used by mixins like [Debounce] and [Throttle].
-/// You should not use this directly.
-class _InternalMixinProps {
-  /// Map that stores the run-number for debounce actions with a specific lock.
-  final Map<Object?, int> debounceLockMap = {};
-
-  /// Map that stores the last execution time for throttle actions with a specific lock.
-  final Map<Object?, DateTime> throttleLockMap = {};
-
-  /// Clears all mixin-related locks.
-  void clear() {
-    debounceLockMap.clear();
-    throttleLockMap.clear();
   }
 }

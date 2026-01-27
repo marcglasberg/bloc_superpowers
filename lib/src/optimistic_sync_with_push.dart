@@ -1,11 +1,8 @@
 // Developed by Marcelo Glasberg (2026) https://glasberg.dev and https://github.com/marcglasberg
 // For more info, see: https://pub.dartlang.org/packages/bloc_superpowers and http://blocsuperpowers.org
-
 // ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-
 import 'dart:async';
 import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:bloc_superpowers/bloc_superpowers.dart';
 
@@ -25,7 +22,8 @@ Set<Object?> _getOptimisticSyncKeySet() {
 }
 
 Map<Object?, _RevisionEntry> _getRevisionMap() {
-  var map = Superpowers.prop<Map<Object?, _RevisionEntry>?>(_revisionMapPropKey);
+  var map =
+      Superpowers.prop<Map<Object?, _RevisionEntry>?>(_revisionMapPropKey);
   if (map == null) {
     map = {};
     Superpowers.setProp(_revisionMapPropKey, map);
@@ -228,7 +226,8 @@ extension OptimisticSyncWithPushExtension<S> on Cubit<S> {
       // Safety check to avoid infinite loops.
       requestCount++;
       if ((maxFollowUpRequests != -1) && (requestCount > maxFollowUpRequests)) {
-        throw StateError('Too many follow-up requests (> $maxFollowUpRequests).');
+        throw StateError(
+            'Too many follow-up requests (> $maxFollowUpRequests).');
       }
 
       // Track the informed server revision for this request.
@@ -302,8 +301,7 @@ extension OptimisticSyncWithPushExtension<S> on Cubit<S> {
           if (serverResponse != null) {
             // Only apply if the informed server revision still matches the latest
             // known server revision for this key (i.e., no newer push arrived).
-            final bool shouldApply =
-                informedServerRev! >= currentServerRev;
+            final bool shouldApply = informedServerRev! >= currentServerRev;
 
             if (shouldApply) {
               revisionMap[key] = _RevisionEntry(
@@ -401,7 +399,8 @@ extension OptimisticSyncWithPushExtension<S> on Cubit<S> {
 
     // Determine the current known server revision for this key.
     // This is the max of what we have in the map versus what is in the state.
-    final currentServerRev = max(serverRevisionFromMap, serverRevisionFromState);
+    final currentServerRev =
+        max(serverRevisionFromMap, serverRevisionFromState);
 
     // Seed the map from persisted state, if needed.
     // This is important even when we ignore the push as stale.

@@ -2,8 +2,9 @@
 
 This package gives **superpowers** to your Cubits.
 
-> Cubits are easier to use than Blocs, but they lack some features that make Blocs powerful.
-This package makes Cubits more powerful than Blocs, and even easier to use than before.
+> Cubits are easier to use than Blocs, but they lack some features that make Blocs
+> powerful.
+> This package makes Cubits more powerful than Blocs, and even easier to use than before.
 
 ### Complete docs → [blocsuperpowers.org](http://blocsuperpowers.org)
 
@@ -965,3 +966,127 @@ Widget build(BuildContext context) {
   return Text('My App');
 }
 ```
+
+---
+
+## Global error handling
+
+Use `Superpowers.globalCatchError` to handle all errors in one place.
+
+This is useful for centralized logging and for converting technical errors
+(like `FirebaseException` or `DioException`) into user-friendly messages.
+
+```dart
+void main() {
+  Superpowers.globalCatchError = (error, stackTrace, key) {
+    // Log all errors
+    logError(error, stackTrace);
+
+    // Convert to a friendly message
+    if (error is UserException) throw error;
+    else throw UserException('Something went wrong. Please try again.');
+  };
+
+  runApp(Superpowers(child: MaterialApp(...)));
+}
+```
+
+The handler receives the error, its stack trace, and the `key` from the `mix` call.
+
+If the handler returns normally, the error is suppressed.
+If it throws a `UserException`, the error dialog appears.
+If it throws anything else, the error propagates (useful in debug mode).
+
+The global handler only runs when local `catchError` handlers don't suppress the error.
+
+---
+
+## Observer
+
+Use `Superpowers.observer` to watch all `mix` calls in your app.
+
+The observer is called twice for each `mix` call: once when it starts, and once when it
+ends.
+
+This is useful for performance tracking, analytics, debugging, and error monitoring.
+
+```dart
+void main() {
+  Superpowers.observer = (isStart, key, metrics, error, stackTrace, duration) {
+    if (isStart) {
+      print('Starting: $key');
+    } else {
+      print('Finished: $key in ${duration?.inMilliseconds}ms');
+    }
+  };
+
+  runApp(Superpowers(child: MaterialApp(...)));
+}
+```
+
+The observer receives:
+
+* `isStart`: `true` at start, `false` at end.
+* `key`: The key from the `mix` call.
+* `metrics`: Custom data you provide via the `metrics` parameter.
+* `error` and `stackTrace`: The error that occurred, or `null` if successful.
+* `duration`: How long the operation took.
+
+You can pass custom data to the observer using the `metrics` parameter.
+A common pattern is to pass the Cubit itself to access its state:
+
+```dart
+void loadUser() => mix(
+  key: this,
+  metrics: () => this, // Pass the Cubit to the observer
+  () async {
+    final user = await api.getUser();
+    emit(state.copyWith(user: user));
+  },
+);
+```
+
+The `metrics` callback is called at start and end, so you can see how the state changed.
+
+When using `retry`, the observer is called only once at the start and once at the end,
+not for each retry attempt.
+
+---
+
+## Props
+
+Use `Superpowers.setProp()` and `Superpowers.prop<T>()` to store and retrieve
+key-value data across your app.
+
+```dart
+// Save
+Superpowers.setProp('refreshTimer', Timer.periodic(
+  Duration(minutes: 5),
+  (_) => refreshData(),
+));
+
+// Read
+var timer = Superpowers.prop<Timer>('refreshTimer');
+```
+
+The main benefit is **automatic cleanup**. When you call `Superpowers.clear()` in tests
+or `Superpowers.prepareToLogout()` when the user logs out, all props are cleared
+and disposable types (`Timer`, `StreamSubscription`, `Sink`, etc.) are automatically
+canceled or closed.
+
+```dart
+// In tests
+setUp(() {
+  Superpowers.clear(); // Resets everything
+});
+
+// On logout
+Future<void> logout() async {
+  await Superpowers.prepareToLogout(); // Clears user data, keeps app config
+  await authService.signOut();
+}
+```
+
+The difference between `clear()` and `prepareToLogout()`:
+`clear()` resets everything including `globalCatchError` and `observer`.
+`prepareToLogout()` clears user data but keeps your app-level configuration.

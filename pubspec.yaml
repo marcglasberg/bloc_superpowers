@@ -1,6 +1,6 @@
 name: bloc_superpowers
 description: "Bloc Superpowers"
-version: 0.0.1
+version: 1.0.0
 homepage: blocsuperpowers.org
 
 environment:
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.1.5+1
   bloc: ^9.1.0
-  flutter_bloc: ^9.1.1
   fast_immutable_collections: ^11.1.0
   collection: ^1.18.0
   connectivity_plus: ">=6.0.3 <8.0.0"
@@ -23,5 +23,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_bloc: ^9.1.1
 
 flutter:

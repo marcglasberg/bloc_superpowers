@@ -1,6 +1,5 @@
 // Developed by Marcelo Glasberg (2026) https://glasberg.dev and https://github.com/marcglasberg
 // For more info, see: https://pub.dartlang.org/packages/bloc_superpowers and http://blocsuperpowers.org
-
 import 'package:bloc_superpowers/src/user_exception_i18n.dart';
 import 'package:i18n_extension_core/i18n_extension_core.dart';
 import "package:meta/meta.dart";
