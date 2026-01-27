@@ -1,0 +1,26 @@
+name: example
+description: "Examples"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  shared_preferences: ^2.5.4
+  fast_immutable_collections: ^11.1.0
+  bloc_superpowers:
+    path: ../
+  flutter_bloc: ^9.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
