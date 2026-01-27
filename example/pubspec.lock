@@ -31,7 +31,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -331,10 +331,10 @@ packages:
     dependency: transitive
     description:
       name: serverpod_serialization
-      sha256: e68bee9f9e5d609ae6249365826748c43742fd05080bae8549eabf939294271c
+      sha256: "69d0b721c4b7d50b53861681e1c7d385a3def0be9a52e89fd3bd0c704fce0d37"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.2"
+    version: "3.2.3"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -347,10 +347,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_android
-      sha256: "83af5c682796c0f7719c2bbf74792d113e40ae97981b8f266fa84574573556bc"
+      sha256: cbc40be9be1c5af4dab4d6e0de4d5d3729e6f3d65b89d21e1815d57705644a6f
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.18"
+    version: "2.4.20"
   shared_preferences_foundation:
     dependency: transitive
     description:

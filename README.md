@@ -17,7 +17,8 @@
 </p>
 
 Created
-by [Marcelo Glasberg](https://glasberg.dev) _(2026)_ | [LinkedIn](https://linkedin.com/in/marcglasberg/) | [GitHub](https://github.com/marcglasberg/)
+by [Marcelo Glasberg](https://glasberg.dev) _(
+2026)_ | [LinkedIn](https://linkedin.com/in/marcglasberg/) | [GitHub](https://github.com/marcglasberg/)
 
 #### Contributors
 
@@ -33,7 +34,7 @@ This package gives **superpowers** to your Cubits.
 > powerful.
 > This package makes Cubits more powerful than Blocs, and even easier to use than before.
 
-### Complete docs → [blocsuperpowers.org](http://blocsuperpowers.org)
+### Complete docs → [blocsuperpowers.org](https://blocsuperpowers.org)
 
 ## List of features
 
@@ -105,6 +106,17 @@ This package gives **superpowers** to your Cubits.
 * [`EffectQueue`](https://blocsuperpowers.org/effects/effect-queues): Allows Cubits to
   emit queued one-time effects to the UI,
   ensuring they are shown one after the other.
+
+* [`globalCatchError`](https://blocsuperpowers.org/advanced/global-catch-error): Set a
+  global error handler for all mix calls in your app. Log errors, show friendly messages,
+  or convert API errors to user exceptions in one place.
+
+* [`observer`](https://blocsuperpowers.org/advanced/global-observer): Set up a global
+  observer to track all mix calls for performance tracking, analytics, debugging, and
+  monitoring.
+
+* [`props`](https://blocsuperpowers.org/advanced/props): Key-value storage for shared data
+  like timers and streams that gets automatically cleaned up on logout or in tests.
 
 ## Setup
 
@@ -1120,7 +1132,7 @@ The difference between `clear()` and `prepareToLogout()`:
 
 ***
 
-### Complete docs → [blocsuperpowers.org](http://blocsuperpowers.org)
+### Complete docs → [blocsuperpowers.org](https://blocsuperpowers.org)
 
 ***
 
