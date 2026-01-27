@@ -8,7 +8,6 @@ import 'package:bloc_superpowers/bloc_superpowers.dart';
 
 /// The set of keys that are currently locked (requests in flight).
 /// Stored in Superpowers.props so it's cleared by Superpowers.clear().
-/// Uses the same key as the OptimisticSyncWithPush mixin for consistency.
 const _keySetPropKey = '_optimisticSyncWithPushKeySet';
 const _revisionMapPropKey = '_optimisticSyncWithPushRevisionMap';
 

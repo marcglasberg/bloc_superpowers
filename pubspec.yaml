@@ -1,7 +1,7 @@
 name: bloc_superpowers
 description: "Bloc Superpowers"
 version: 1.0.0
-homepage: blocsuperpowers.org
+homepage: https://blocsuperpowers.org
 
 environment:
   sdk: '>=3.5.0 <4.0.0'

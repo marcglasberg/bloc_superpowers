@@ -479,7 +479,7 @@ class _Mix {
   ///   },
   /// );
   ///
-  /// // With checkInternet - shows dialog if no internet (like CheckInternet mixin)
+  /// // With checkInternet - shows dialog if no internet
   /// await mix(
   ///   checkInternet: checkInternet,  // Uses defaults (abortSilently: false, ifOpenDialog: true)
   ///   () async {
@@ -496,7 +496,7 @@ class _Mix {
   ///   },
   /// );
   ///
-  /// // With checkInternet - aborts silently (like AbortWhenNoInternet mixin)
+  /// // With checkInternet - aborts silently
   /// await mix(
   ///   checkInternet: checkInternet(abortSilently: true),
   ///   () async {
@@ -619,8 +619,8 @@ class _Mix {
   ///   search-as-you-type scenarios. Pass `DebounceConfig(key, duration: Duration(...))`.
   /// - [checkInternet]: A [CheckInternetConfig] that checks for internet connectivity before running.
   ///   Use the [checkInternet] preset for defaults, or call it to override:
-  ///   - `abortSilently`: If `true`, returns null immediately without any exception
-  ///     (like [AbortWhenNoInternet] mixin). If `false` (default), throws a [ConnectionException].
+  ///   - `abortSilently`: If `true`, returns null immediately without any exception.
+  ///     If `false` (default), throws a [ConnectionException].
   ///   - `ifOpenDialog`: Only applies when `abortSilently: false`. If `true` (default),
   ///     the [ConnectionException] is added to [Superpowers]'s error queue for dialog display.
   ///     If `false`, the exception is rethrown for manual handling via `context.isFailed()`.
@@ -1902,7 +1902,7 @@ FutureOr<T> Function() _buildEffectiveWrapRun<T>({
   final effectiveMaxDelayNoInternet =
       maxRetryDelay ?? const Duration(seconds: 1);
 
-  // Create retry wrapRun (similar to Retry mixin's wrapRun)
+  // Create retry wrapRun.
   return () {
     var attempts = 0;
     Duration? currentDelay;

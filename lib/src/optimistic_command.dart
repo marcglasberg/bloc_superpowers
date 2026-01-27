@@ -8,7 +8,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 /// The set of keys that are currently running (for non-reentrant support).
 /// Stored in Superpowers.props so it's cleared by Superpowers.clear().
-/// Uses the same key as the OptimisticCommand mixin for consistency.
 const _propKey = '_optimisticCommandKeySet';
 
 Set<Object?> _getNonReentrantKeySet() {
@@ -92,7 +91,6 @@ extension OptimisticCommandExtension<S> on Cubit<S> {
   /// }
   /// ```
   Future<void> optimisticCommand({
-    // Required parameters: equivalent to mixin's abstract methods
     required Object? Function() optimisticValue,
     required S Function(S state, Object? value) applyValueToState,
     required Object? Function(S state) getValueFromState,
@@ -101,7 +99,7 @@ extension OptimisticCommandExtension<S> on Cubit<S> {
     required Object key,
     Object? nonReentrantKey,
 
-    // Optional callbacks: equivalent to mixin's overridable methods
+    // Optional callbacks.
     S? Function(S state, Object serverResponse)? applyServerResponseToState,
     Future<Object?> Function()? reloadFromServer,
     S? Function({

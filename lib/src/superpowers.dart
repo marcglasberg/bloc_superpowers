@@ -285,8 +285,8 @@ class RunStatus {
 
 // ---------- Superpowers ----------
 
-/// A widget that enables [context.isWaiting_Mixin], [context.isFailed_Mixin], and
-/// [context.exceptionFor_Mixin] to trigger widget rebuilds when method state changes.
+/// A widget that enables `context.isWaiting`, `context.isFailed`, and
+/// `context.getException` to trigger widget rebuilds when method state changes.
 ///
 /// Place this widget near the top of your widget tree, typically wrapping
 /// your [MaterialApp] or [CupertinoApp]:
@@ -309,12 +309,8 @@ class RunStatus {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   if (context.isWaiting(FetchUserAction)) {
-///     return CircularProgressIndicator();
-///   }
-///   if (context.isFailed(FetchUserAction)) {
-///     return Text('Error: ${context.getException(FetchUserAction)?.message}');
-///   }
+///   if (context.isWaiting(FetchUserAction)) return CircularProgressIndicator();
+///   if (context.isFailed(FetchUserAction)) return Text('Error: ${context.getException(FetchUserAction)?.message}');
 ///   return UserProfile();
 /// }
 /// ```
@@ -341,14 +337,14 @@ class Superpowers extends StatefulWidget {
   /// - Returns `null` to use the real connectivity check (default)
   static bool? Function() _simulateInternet = () => null;
 
-  /// Returns the simulated internet state for use by connectivity mixins.
+  /// Returns the simulated internet state for use by connectivity checks.
   ///
   /// - `true`: Simulate internet being ON
   /// - `false`: Simulate internet being OFF
   /// - `null`: Use the real connectivity check (default)
   ///
-  /// This is set via [Superpowers.clear] and used by [CheckInternet],
-  /// [AbortWhenNoInternet], and [UnlimitedRetryCheckInternet] mixins.
+  /// This is cleared via [Superpowers.clear] and used by the [mix] param
+  /// `checkInternet`.
   static bool? get simulateInternet => _simulateInternet();
 
   // -------- Props (Key-Value Storage) --------

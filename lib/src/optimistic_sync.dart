@@ -8,7 +8,6 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 
 /// The set of keys that are currently locked (requests in flight).
 /// Stored in Superpowers.props so it's cleared by Superpowers.clear().
-/// Uses the same key as the OptimisticSync mixin for consistency.
 const _propKey = '_optimisticSyncKeySet';
 
 Set<Object?> _getOptimisticSyncKeySet() {
@@ -113,7 +112,7 @@ extension OptimisticSyncExtension<S> on Cubit<S> {
   /// 6. When state stabilizes, optionally applies the server response, releases
   ///    the lock, and calls [onFinish]
   Future<void> optimisticSync<T>({
-    // Required parameters: equivalent to mixin's abstract methods
+    // Required parameters.
     required T Function() valueToApply,
     required S Function(S state, T optimisticValue) applyOptimisticValueToState,
     required T Function(S state) getValueFromState,
