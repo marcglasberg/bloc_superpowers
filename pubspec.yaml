@@ -1,6 +1,6 @@
 name: bloc_superpowers
 description: "Superpowers for your Cubits: Loading and error states, retry, check-internet, debounce, throttle, non-reentrant, fresh, sequential, effects, optimistic functions."
-version: 1.1.0
+version: 1.1.1
 homepage: https://blocsuperpowers.org
 repository: https://github.com/marcglasberg/bloc_superpowers
 issue_tracker: https://github.com/marcglasberg/bloc_superpowers/issues
