@@ -1157,18 +1157,6 @@ mkdir -p ~/.claude/skills
 # Copy or download the skills there
 ```
 
-### Using the skills
-
-Once installed, you can invoke skills in two ways:
-
-1. **Directly with slash commands**: Type `/skill-name` in Claude Code.
-2. **Automatically**: Claude detects when a skill is relevant and applies it.
-
-### Learn more about Claude Code Skills
-
-- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills)
-- [Agent Skills Standard](https://agentskills.io)
-
 ***
 
 ### Complete docs → [blocsuperpowers.org](https://blocsuperpowers.org)
