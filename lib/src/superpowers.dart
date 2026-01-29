@@ -230,8 +230,9 @@ extension SuperpowersContextExtension on BuildContext {
 
 // ---------- RunStatus ----------
 
-/// Tracks the run status of a [Method].
+/// Tracks the run status of a [mix] call.
 class RunStatus {
+  /// Creates a [RunStatus] with the specified execution state.
   const RunStatus({
     this.isDispatched = false,
     this.hasFinishedBefore = false,
@@ -326,6 +327,7 @@ class Superpowers extends StatefulWidget {
   /// The child widget tree.
   final Widget child;
 
+  /// Creates a [Superpowers] widget with the given [child].
   const Superpowers({required this.child, super.key});
 
   @override

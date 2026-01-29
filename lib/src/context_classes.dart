@@ -43,6 +43,7 @@ class MixContext {
   /// Context for sequential feature. Non-null if [mix.ctx] was called with [sequential].
   final SequentialContext? sequential;
 
+  /// Creates a [MixContext] with the given feature contexts.
   const MixContext({
     this.retry,
     this.nonReentrant,
@@ -71,6 +72,7 @@ class RetryContext {
   ///   (or keep incrementing if maxRetries is -1 for unlimited retries).
   final int attempt;
 
+  /// Creates a [RetryContext] with the resolved configuration and attempt count.
   const RetryContext({
     required this.config,
     this.attempt = 0,
@@ -86,6 +88,7 @@ class NonReentrantContext {
   /// This is the merged result of defaults, [MixConfig.nonReentrant], and explicit nonReentrant parameter.
   final ResolvedNonReentrantConfig config;
 
+  /// Creates a [NonReentrantContext] with the resolved configuration.
   const NonReentrantContext({required this.config});
 }
 
@@ -98,6 +101,7 @@ class ThrottleContext {
   /// This is the merged result of defaults, [MixConfig.throttle], and explicit throttle parameter.
   final ResolvedThrottleConfig config;
 
+  /// Creates a [ThrottleContext] with the resolved configuration.
   const ThrottleContext({required this.config});
 }
 
@@ -110,6 +114,7 @@ class DebounceContext {
   /// This is the merged result of defaults, [MixConfig.debounce], and explicit debounce parameter.
   final ResolvedDebounceConfig config;
 
+  /// Creates a [DebounceContext] with the resolved configuration.
   const DebounceContext({required this.config});
 }
 
@@ -122,6 +127,7 @@ class FreshContext {
   /// This is the merged result of defaults, [MixConfig.fresh], and explicit fresh parameter.
   final ResolvedFreshConfig config;
 
+  /// Creates a [FreshContext] with the resolved configuration.
   const FreshContext({required this.config});
 }
 
@@ -134,6 +140,7 @@ class CheckInternetContext {
   /// This is the merged result of defaults, [MixConfig.checkInternet], and explicit checkInternet parameter.
   final ResolvedCheckInternetConfig config;
 
+  /// Creates a [CheckInternetContext] with the resolved configuration.
   const CheckInternetContext({required this.config});
 }
 
@@ -164,6 +171,7 @@ class SequentialContext {
   /// the action never executes and this context is never received.
   final int index;
 
+  /// Creates a [SequentialContext] with the resolved configuration and queue status.
   const SequentialContext({
     required this.config,
     required this.wasQueued,

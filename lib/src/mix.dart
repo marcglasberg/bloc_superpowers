@@ -7,9 +7,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 export 'package:bloc_superpowers/src/config_classes.dart';
 export 'package:bloc_superpowers/src/context_classes.dart';
 
+/// Extension for creating [Duration] from [int] values.
 extension IntDurationExtension on int {
+  /// Returns a [Duration] of this many milliseconds.
   Duration get millis => Duration(milliseconds: this);
 
+  /// Returns a [Duration] of this many seconds.
   Duration get sec => Duration(seconds: this);
 }
 

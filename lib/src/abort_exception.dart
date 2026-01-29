@@ -29,6 +29,9 @@
 /// );
 /// ```
 class AbortException implements Exception {
+  /// Creates an [AbortException] to abort [mix] execution silently.
+  const AbortException();
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

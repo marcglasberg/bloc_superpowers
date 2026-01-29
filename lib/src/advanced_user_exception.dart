@@ -192,8 +192,8 @@ class AdvancedUserException extends UserException {
   }
 }
 
+/// Extension on [UserException] for advanced features like callbacks and properties.
 extension UserExceptionAdvancedExtension on UserException {
-  //
   /// The `onOk` callback of the exception, or `null` if it was not defined.
   VoidCallback? get onOk {
     var exception = this;

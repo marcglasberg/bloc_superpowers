@@ -1,5 +1,6 @@
 import 'package:i18n_extension_core/i18n_extension_core.dart';
 
+/// Localization extension for [UserException] messages.
 extension Localization on String {
   static final _t = Translations.byText('en-US') +
       {
@@ -20,5 +21,6 @@ extension Localization on String {
         "he": "סיבה", // Hebrew
       };
 
+  /// Returns the localized version of this string.
   String get i18n => localize(this, _t);
 }

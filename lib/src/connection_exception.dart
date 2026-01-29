@@ -62,6 +62,7 @@ class ConnectionException extends AdvancedUserException {
           props: const IMapConst<String, dynamic>({}),
         );
 
+  /// The host that could not be connected to, or null for generic connectivity errors.
   final String? host;
 
   @override

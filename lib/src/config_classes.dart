@@ -23,6 +23,7 @@ class RetryConfig {
   final void Function(
       int attempt, Duration delay, Object error, StackTrace stack)? onRetry;
 
+  /// Creates a [RetryConfig] with optional overrides.
   const RetryConfig({
     this.maxRetries,
     this.initialDelay,
@@ -87,6 +88,7 @@ class RetryConfig {
   /// ```
   RetryConfig get unlimited => call(maxRetries: -1);
 
+  /// Creates a new [RetryConfig] by overriding specific values.
   RetryConfig call({
     int? maxRetries,
     Duration? initialDelay,
@@ -177,6 +179,10 @@ class CheckInternetConfig {
   /// This is called regardless of whether [abortSilently] is true or false.
   final void Function()? onNoInternet;
 
+  /// Creates a [CheckInternetConfig] with optional overrides.
+  ///
+  /// All parameters are optional; unspecified values are inherited from
+  /// [CheckInternetConfig.defaults] when used with [mix].
   const CheckInternetConfig({
     this.abortSilently,
     this.ifOpenDialog,
@@ -227,6 +233,12 @@ class CheckInternetConfig {
     );
   }
 
+  /// Creates a new [CheckInternetConfig] by overriding specific values.
+  ///
+  /// This allows the [checkInternet] constant to be called like a function:
+  /// ```dart
+  /// mix(checkInternet: checkInternet(abortSilently: true))
+  /// ```
   CheckInternetConfig call({
     bool? abortSilently,
     bool? ifOpenDialog,
@@ -304,6 +316,7 @@ class NonReentrantConfig {
   /// is already in progress. Receives the effective key that was blocked.
   final void Function(Object key)? onBlocked;
 
+  /// Creates a [NonReentrantConfig] with optional overrides.
   const NonReentrantConfig({this.key, this.onBlocked});
 
   /// Default nonReentrant configuration values.
@@ -327,6 +340,7 @@ class NonReentrantConfig {
     );
   }
 
+  /// Creates a new [NonReentrantConfig] by overriding specific values.
   NonReentrantConfig call(
           {Object? key, void Function(Object key)? onBlocked}) =>
       NonReentrantConfig(
@@ -383,6 +397,7 @@ class ThrottleConfig {
   /// Receives the effective key and the remaining time until the lock expires.
   final void Function(Object key, Duration remainingTime)? onThrottled;
 
+  /// Creates a [ThrottleConfig] with optional overrides.
   const ThrottleConfig({
     this.key,
     this.duration,
@@ -434,6 +449,7 @@ class ThrottleConfig {
     );
   }
 
+  /// Creates a new [ThrottleConfig] by overriding specific values.
   ThrottleConfig call({
     Object? key,
     Duration? duration,
@@ -515,6 +531,7 @@ class DebounceConfig {
   /// Receives the effective key that was superseded.
   final void Function(Object key)? onSuperseded;
 
+  /// Creates a [DebounceConfig] with optional overrides.
   const DebounceConfig({
     this.key,
     this.duration,
@@ -555,6 +572,7 @@ class DebounceConfig {
     );
   }
 
+  /// Creates a new [DebounceConfig] by overriding specific values.
   DebounceConfig call({
     Object? key,
     Duration? duration,
@@ -624,6 +642,7 @@ class FreshConfig {
   /// Receives the effective key and the remaining time until the data becomes stale.
   final void Function(Object key, Duration remainingFreshTime)? onFresh;
 
+  /// Creates a [FreshConfig] with optional overrides.
   const FreshConfig({
     this.key,
     this.freshFor,
@@ -670,6 +689,7 @@ class FreshConfig {
     );
   }
 
+  /// Creates a new [FreshConfig] by overriding specific values.
   FreshConfig call({
     Object? key,
     Duration? freshFor,
@@ -782,6 +802,7 @@ class SequentialConfig {
   /// Receives the effective key and the reason why it was dropped.
   final void Function(Object key, SequentialDropReason reason)? onDropped;
 
+  /// Creates a [SequentialConfig] with optional overrides.
   const SequentialConfig({
     this.key,
     this.maxQueueSize,
@@ -846,6 +867,7 @@ class SequentialConfig {
   /// ```
   SequentialConfig get latestWins => call(maxQueueSize: 1, dropOldest: true);
 
+  /// Creates a new [SequentialConfig] by overriding specific values.
   SequentialConfig call({
     Object? key,
     int? maxQueueSize,
@@ -987,6 +1009,7 @@ class MixConfig {
   /// ```
   final Object? Function()? metrics;
 
+  /// Creates a [MixConfig] with optional feature configurations.
   const MixConfig({
     this.retry,
     this.checkInternet,
