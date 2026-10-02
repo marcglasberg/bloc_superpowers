@@ -11,6 +11,12 @@ analyzer:
   errors:
     use_key_in_widget_constructors: ignore ignore
     avoid_print: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
